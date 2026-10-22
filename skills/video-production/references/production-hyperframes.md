@@ -15,7 +15,7 @@ HyperFrames는 에이전트용 공식 스킬을 함께 낸다. 작성 계약과 
 ## 준비
 
 ```bash
-mkdir -p ~/projects/<영상> && cd ~/projects/<영상>
+cd <영상 작업 폴더>
 npm init -y && npm i --save-exact hyperframes@0.8.181 gsap@3.14.2
 ```
 
@@ -27,23 +27,24 @@ npm init -y && npm i --save-exact hyperframes@0.8.181 gsap@3.14.2
 
 ## 프로젝트 모양
 
-시험 제작에서 쓴 방식이다. 박자·목소리 시각을 손으로 HTML에 적지 않고, 자료에서 HTML을 만든다.
+박자·목소리 시각을 손으로 HTML에 적지 않고, 자료에서 HTML을 만든다. 시작 틀이 이 스킬의 `scripts/hyperframes/`에 있다.
 
 ```text
-<영상>/
+<영상 작업 폴더>/
   env.sh
-  src/build.py      # 대사 색인·박자 지도를 읽어 장면 시각을 계산하고 index.html을 쓴다
-  src/index.tpl     # 장면 HTML·CSS·GSAP 틀. 루트에 두지 않는다(루트의 두 번째 *.html은 lint 오류)
-  assets/           # 목소리·음악·효과음·글꼴·그림·gsap.min.js (build.py가 복사)
-  index.html        # build.py가 만든 결과
+  voices.json, lines.json   # 목소리 설정과 대사 (오디오 참고)
+  vo.json                   # lines.py 결과
+  beats.json                # beats.py 결과
+  scenes.json               # 장면 목록: {"music": "assets/music/<곡>.mp3", "music_volume": 0.081, "scenes": [{"title": "…", "lines": ["줄 id", …]}]}
+  src/index.tpl             # 장면 HTML·CSS·GSAP 틀. 루트에 두지 않는다(루트의 두 번째 *.html은 lint 오류)
+  assets/                   # 음성·음악·효과음·글꼴(fonts/main.woff2)·그림, gsap.min.js(build.py가 복사)
+  index.html                # build.py가 만든 결과
   out/
 ```
 
-- `build.py`가 하는 일: 박자 계획(장면 시작·작동·설명·끝을 박 번호로), 박 번호를 프레임으로 바꾸기, 소리 클립 배치, 자료 JSON을 틀에 넣기.
-- 이전 영상 프로젝트의 `src/build.py`·`index.tpl`(기본)·`kinetic.tpl`(키네틱)이 있으면 복사해 시작한다.
-  - 그대로 쓰는 부분: 박자 함수(`beat_at`·`B`·`ceilB`), 소리 배치(`add`, 모노 보정), 음악 볼륨 줄, 자산 복사, 틀에 자료 넣기, GSAP spring ease와 구동 트윈.
-  - 바꾸는 부분: 읽는 대사 색인·편 정의 위치(`SRC`), 장면 목록(`STEPS`)과 그 계획(`step_plan`), 틀 안의 장면 HTML·CSS(제품 화면 미니어처 등).
-- 여러 판(기본·키네틱)은 틀만 바꿔 같은 `build.py`로 만든다: `python3 src/build.py src/kinetic.tpl kinetic`.
+- `python3 scripts/hyperframes/build.py <영상 작업 폴더> [틀]`: 장면을 음악 박자에 놓는다. 장면 첫 박에 제목, 다음 박부터 줄마다 앞 줄이 끝나고 0.4초 뒤의 첫 박에 시작, 마지막 줄 뒤 0.8초 이후의 첫 짝수 박에서 장면이 끝난다. 소리 클립과 음악 볼륨 줄(처음 20프레임 커짐, 마지막 75프레임 줄어듦)을 넣고, 장면 계획 JSON을 틀에 넣어 `index.html`을 쓴다.
+- 시작 틀 `scripts/hyperframes/index.tpl`은 제목과 낱말별로 밝아지는 자막만 있는 최소 모양이다. 영상 작업 폴더의 `src/index.tpl`로 복사해 5단계 디자인 컨셉대로 장면 HTML·CSS·움직임을 바꾸고, 그 경로를 `build.py`의 두 번째 인자로 준다. 장면 계획 방식을 바꿔야 하면 `build.py`도 `src/`로 복사해 고친다.
+- 여러 판(기본·키네틱)은 틀만 바꿔 같은 계획으로 만든다.
 
 ## 작성 규칙
 
@@ -61,12 +62,12 @@ npm init -y && npm i --save-exact hyperframes@0.8.181 gsap@3.14.2
 
 ```bash
 source env.sh
-python3 src/build.py
+python3 <스킬>/scripts/hyperframes/build.py . src/index.tpl
 npx hyperframes lint                     # 쓰는 동안 자주
 npx hyperframes check                    # 렌더 전 필수(lint 포함)
 env -u GEMINI_API_KEY npx hyperframes snapshot --at 3,12,30   # 정지 그림 확인
 npx hyperframes render --quality looks --output out/<이름>-raw.mp4
-python3 encode.py out/<이름>-raw.mp4 out/<이름>.mp4   # −16 LUFS
+python3 <스킬>/scripts/encode.py out/<이름>-raw.mp4 out/<이름>.mp4   # −16 LUFS
 ```
 
 - 5단계 대표 장면 정지 그림은 `snapshot`으로 만든다.

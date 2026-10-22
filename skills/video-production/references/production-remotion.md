@@ -13,17 +13,17 @@
 
 | 영상마다 그대로 쓴다 | 제품마다 새로 만든다 |
 |---|---|
-| [오디오](audio.md)의 `tools/vo.py`·`tools/lines.py`·`tools/beats.py`·`encode.py` | 앱 모양 부품(로고·창·키보드 등 미니어처) |
+| 이 스킬의 `scripts/`(`lines.py`·`vo.py`·`beats.py`·`encode.py`) | 앱 모양 부품(로고·창·키보드 등 미니어처) |
 | 박자 함수(`beatAt`·`B`·`ceilB`), 목소리에 맞춰 글자가 써지는 부품, 전환 부품, 끝 카드 | 설정 창 같은 제품 화면, 편 정의와 내용 |
 | 박자 계획(`plan`·`stepPlan`)과 커서 | 대사 파일·음성 색인, 음악·효과음·그림 |
 
 ## 순서
 
 1. 대사: 대사 파일(`lines.json`)에 줄을 쓰고, 편 정의에 그 줄을 배정한다.
-2. 음성: `python3 tools/lines.py [편 번호|줄 id]` → 음성 파일과 색인(`vo.json`). 렌더 전에 먼저 돌린다(음성 파일이 없으면 박자 계획이 오류를 낸다).
-3. 박자 지도: 곡을 바꿀 때만 `python3 tools/beats.py public/music/<곡>.mp3 > src/music-beats.json`.
+2. 음성: `python3 <스킬>/scripts/lines.py <영상 작업 폴더> [줄 id…]` → 음성 파일과 색인(`vo.json`). 렌더 전에 먼저 돌린다(음성 파일이 없으면 박자 계획이 오류를 낸다). Remotion은 `public/` 아래 파일만 읽으므로 `assets/`를 `public/`으로 두거나 연결한다.
+3. 박자 지도: 곡을 바꿀 때만 `python3 <스킬>/scripts/beats.py <곡.mp3> > src/music-beats.json`.
 4. 렌더: `npx remotion render src/index.js <composition id> out/<이름>-raw.mp4 --codec=h264 --crf=18`.
-5. 인코딩: `python3 encode.py out/<이름>-raw.mp4 out/<이름>.mp4`(−16 LUFS).
+5. 인코딩: `python3 <스킬>/scripts/encode.py out/<이름>-raw.mp4 out/<이름>.mp4`(−16 LUFS).
 
 ## 디자인 값의 예 (새 영상은 5단계 컨셉으로 정한다)
 
