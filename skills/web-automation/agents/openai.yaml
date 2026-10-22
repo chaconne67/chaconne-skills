@@ -1,0 +1,4 @@
+interface:
+  display_name: "Web Automation"
+  short_description: "Operate and code browser flows with result-marker waits"
+  default_prompt: "Use $web-automation for this browser operation or automation code task. Classify its phase, define each action's result marker and generous finite deadline, and verify readiness before dependent actions through investigation, integration, or authorized final-path execution."

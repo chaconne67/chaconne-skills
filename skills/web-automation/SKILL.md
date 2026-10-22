@@ -1,0 +1,254 @@
+---
+name: web-automation
+description: Use when operating websites, verifying remote development UI, or writing, modifying, debugging, reviewing, or testing web automation code, including Playwright, Selenium, and CDP workflows.
+---
+
+# Web Automation
+
+Use this skill before manipulating or extracting from a web page and before developing or reviewing code that does so. Base browser behavior on the observed page and session, not guessed selectors, guessed URLs, or remembered flows.
+
+Terminology:
+
+- **Final-path implementation**: the durable functions, wrapper, and session service that own the browser workflow.
+- **Final-path command**: the official CLI or service entry that invokes that implementation.
+
+For remote development UI acceptance tests, first read **Remote development UI verification** below.
+It defines the isolated test scope; the Operation Gate continues to govern production and external effects.
+
+## Operation Gate
+
+Before any browser action, declare the current phase. Declare again before changing phases.
+
+| Phase | Purpose | Allowed path |
+|---|---|---|
+| **Investigation** | Observe, debug, inspect page structure, and reproduce behavior | Direct browser tools and inline inspection may create diagnostic evidence, but not the requested data, download, submission, publication, or external state |
+| **Execution** | Produce requested data/downloads or persist authentication, drafts, submissions, publications, or admin state | Run the final-path command; do not substitute ad hoc browser manipulation |
+| **Integration** | Convert investigation evidence into durable automation | Merge into the responsible final-path implementation stage and verify it through the final-path command |
+
+Manual reproduction proves only observed page behavior, not the automation. If no final-path command exists, complete Integration before Execution rather than using direct manipulation as a fallback.
+
+Execution must remain within the authority granted by the user. Stop before externally visible or destructive actions when approval is absent or ambiguous.
+
+If the project provides a UI design skill, use it together with this one for UI or template changes. That skill owns project URLs, interaction acceptance, and screenshot verification; this skill still owns browser phase classification.
+
+## Result-marker readiness
+
+Apply this contract in every phase, both to direct browser actions and to the final-path implementation. Repeated incidents show that an elapsed delay cannot establish that the next screen is ready.
+
+Before an action that changes page or control state, define its **result marker**: the observed text, element, value, or state that proves the expected result of that action. Also define the readiness of the control needed next. Bind the marker to the correct page, frame, modal, account, query, or item as applicable; a stale result from the preceding action must not satisfy it.
+
+Use this sequence:
+
+```text
+Define result marker and deadline -> act once -> wait for that marker -> confirm next control is usable -> observe current state -> continue
+```
+
+- Wait for the positive expected result, not merely `domcontentloaded`, `networkidle`, a stable URL/title, or a disappearing loader. Those signals may support a marker but do not alone prove the required screen, data, or control is ready. A fixed sleep is not a readiness check.
+- Set an explicit, generous, finite deadline for the stage. Make it substantially longer than ordinary loading time and sufficient for evidenced slow cases; retain its configuration and reason. Check nested navigation, tool, and locator timeouts so a shorter default does not accidentally end this wait early. Do not prescribe one universal duration for unrelated sites.
+- Proceed as soon as the marker and next-control readiness are confirmed; do not wait out the remaining deadline or add an arbitrary delay afterward. A polling interval only schedules observations and never establishes success.
+- Reuse the responsible stage's existing wait mechanism or the browser framework's locator/condition waits. Keep the marker, timeout, and failure handling in the official workflow rather than adding a separate readiness runner.
+- For visual or coordinate automation, inspect a fresh screenshot for the real result marker. Distinguish ready, still loading, and unavailable/wrong screen. While loading, re-observe within the deadline; derive coordinates only from the ready screen. An absent target is not permission to invent coordinates. Authentication challenges and evidenced blockers follow the existing Stop Conditions immediately.
+- If the marker or required control is still absent at the deadline, fail that stage explicitly and do not perform dependent actions. Save the expected marker, elapsed time, last URL/frame/state, and redacted evidence. Preserve the session and completed work; investigate the missing result before any retry, and retry only after a verified premise changes.
+
+## Remote development UI verification
+
+When the app runs on a remote server and the browser runs on the local machine, follow this procedure.
+Project instructions supply the SSH target, repository, runtime and start command, isolated test setup,
+asset build/serve commands, target routes, and design acceptance criteria. Verify those values from the
+current project before dependent actions; do not copy another project's addresses, ports, or framework settings.
+
+### 1. Identify the two machines and the current session
+
+The agent operates a browser on the local machine; the application and development server
+run on the remote Linux host. `127.0.0.1` always refers to the machine making that connection.
+A browser launched on remote Linux is a separate environment; its window is not automatically visible on the local machine.
+Confirm the actual execution hosts when using another agent or browser tool.
+
+Record this once and update only changed values after a restart or tab/port change:
+
+| Component | Evidence to retain |
+|---|---|
+| Server | SSH host, repository/revision or working changes, start command, process/tool session ID |
+| Data | Settings, actual test DB/schema, test user role, blocked external effects |
+| Connection | Server binding/port, local port or approved project URL, tunnel session ID |
+| Browser | Machine, browser name, browser/tab IDs, exact URL |
+
+Follow a user-specified browser. Otherwise prefer an available in-app browser for a review the user should see. Inspect tool
+capabilities and current tabs before selecting it. An ambient URL or an old error message is not proof that
+a server, tab, or dialog is still present.
+
+### 2. Prepare the application's real test path
+
+Use the project's existing development/test entry point and fixtures. Confirm the actual database connection
+and schema; a setting named local, development, or debug does not establish isolation. Keep credentials out
+of logs. Use isolated synthetic data and existing test doubles for email, messages, and external APIs.
+
+For UI acceptance testing, operating the actual application UI against verified isolated test data is
+Investigation: it establishes application behavior, not a reusable automation's success. Assert resulting
+test data as well as screen feedback. Production or external-service effects remain subject to the Operation
+Gate and its final-path command requirement. Do not create an automation wrapper merely to inspect a test UI.
+
+Check build output locations and shared mounts before building or collecting assets. Use the project's
+commands and static serving configuration. A successful build does not establish that the browser received
+the new CSS. Resolve manifest/hash versus source-file serving in the responsible test configuration; do not
+alter production settings, inject CSS, or rewrite captured HTML to claim the actual application path passed.
+
+### 3. Start the remote server and connect the local machine
+
+Bind the development server to the remote loopback interface and use SSH local forwarding by default.
+Follow an explicitly defined project access path when one already exists; verify its server and browser
+endpoints rather than silently replacing it. Check both ports and their owners before allocating a new port.
+
+For SSH forwarding, run this command shape on the local machine in a tracked session.
+Replace the placeholders with the verified project/session values before execution:
+
+```text
+ssh -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -L 127.0.0.1:<local-port>:127.0.0.1:<remote-port> <ssh-target>
+```
+
+The listener is on the local machine; the destination loopback is on the SSH target. The browser opens
+`http://127.0.0.1:<local-port>/<route>`. If the app lives in a container, first verify the host-to-container
+port mapping. Keep the server and tunnel session IDs separate even when one tool manages both.
+
+Verify the remote process/listener and HTTP response first, then the same route from the local machine.
+A running SSH process alone does not prove the development server is reachable. Check redirects and the
+expected application marker. Do not solve connection errors by exposing a development port publicly,
+changing production firewalls/DB tunnels, or killing an unidentified process.
+
+### 4. Verify CSS, then appearance and behavior
+
+1. Confirm the selected tab's URL, title, logged-in role, and changed screen. A login or stale page returning
+   HTTP 200 is not the requested screen.
+2. Inspect the document's actual stylesheet requests, successful response/type/content, and current console
+   errors. Compare representative elements' computed styles with the project's tokens/classes. Report any
+   unavailable network/computed-style evidence instead of treating it as passed.
+3. If assets are missing or stale, inspect the serving path, code read by the server, and cache. Fix the
+   evidenced cause, refresh, and repeat the same check before judging design.
+4. Inspect actual screenshots at the project's mobile and desktop widths. Check layout, typography, spacing,
+   input/button positions, wrapping, and dialogs. Measure document overflow against viewport width and
+   distinguish intended table scrolling from whole-page overflow.
+5. Exercise affected empty, invalid, loading, success, cancellation, keyboard, and focus states as applicable.
+   Submit through the actual UI in the verified test environment; check resulting data and protected records.
+6. Navigate away and back through the application's partial/client navigation and repeat the affected controls.
+   Attribute requests and console errors to the current attempt, distinguishing old server-shutdown errors.
+
+Automation success without inspecting the rendered screen does not establish design accuracy. For native
+alerts/confirmations, use the current tool's supported dialog API. On failure, re-observe the tab and dialog;
+do not repeat an unchanged failing operation. Only when user action is necessary, give the verified browser
+name, URL, current dialog text, and exact action. Tool limitations do not by themselves justify product changes.
+
+### 5. Report and close the correct resources
+
+Keep project test results, URL/browser/viewport, CSS application evidence, UI/data outcomes, and remaining
+gaps together. Reuse this session through validation rather than repeatedly rebuilding the environment.
+A fixture-owned server lives only as long as its fixture; retain it until the intended review is finished.
+
+When showing a live review to the user, keep the server and connection alive and open the correct tab.
+Verify whether the tool preserves processes after the response before promising an available URL. When
+verification is finished, save evidence and stop only this run's owned tabs, server, and tunnel by tracked ID.
+Preserve user/shared browsers and other jobs. Confirm cleanup of temporary fixtures, files, and test resources.
+
+Mark stopped URLs as stopped; do not ask the user to open them or dismiss a historical dialog there. Report
+code verification, a currently viewable development screen, and production deployment as separate states.
+
+## Preflight
+
+Before launching or attaching to a browser:
+
+- Identify the required browser, profile, session, owner, and lifecycle: existing user browser, dedicated automation profile, transient Playwright/Selenium context, remote Linux/Xvfb Chrome, or CDP-attached Chrome.
+- Determine whether the site is profile, device, 2FA, CAPTCHA, approval, or human-session bound.
+- Classify the intended effect as diagnostic evidence, read-only requested output, draft-only, externally visible, or destructive.
+- Identify the final-path command for Execution or declare that Integration is required first.
+- Follow a user-provided browser/profile path exactly. Do not replace it with a fresh profile or another environment.
+- If a required browser, profile, tool, credential, or approval is unavailable, stop and report the missing dependency instead of substituting another path.
+
+## Investigation
+
+Use this loop only for Investigation:
+
+```text
+Observe -> inspect structure -> map visible controls -> perform one scoped action -> verify state -> continue or stop
+```
+
+Exit Investigation when each safe-to-probe step has a verified selector/action and diagnostic postcondition, and each execution-only step has an explicit required postcondition. Do not repeat an unchanged action after the same blocker; preserve the session and evidence, then retry only when a verified premise or input has changed.
+
+### Page Readiness
+
+Follow **Result-marker readiness** above. Record the current URL, title, result marker, relevant loading/control state, viewport, and scroll height as investigation evidence.
+
+### Structure Inspection
+
+Before choosing selectors, inspect frames, shadow roots, modals, popups, virtualized lists, and rich text editor iframes.
+
+Record each candidate frame's identity, URL, visibility, and ownership. Do not use main-DOM selectors until the target frame, modal, or popup owner is resolved.
+
+### Control Mapping
+
+Map visible controls before acting. Record the tag, accessible name, text, state, rectangle, form owner, and frame owner needed to distinguish each candidate. Capture evidence before safe navigation or a reversible page-state action. Map authentication or persistent-state controls, but defer their use to Execution.
+
+Prefer human-visible controls over hidden/raw inputs:
+
+1. Exact visible label tied to the input.
+2. Visible button/control inside the correct section.
+3. Coordinate click on the measured visible control.
+4. Raw input click only after proving it triggers the same state.
+5. Direct value assignment only after React/value tracker events are handled correctly.
+
+### Step Contract
+
+For every step being investigated or implemented, record:
+
+```text
+precondition
+selector/action
+expected result marker and its page/frame/item context
+next control readiness
+maximum wait and explicit timeout failure
+postcondition (including persisted effects where applicable)
+failure evidence
+```
+
+During Investigation, perform one safe scoped action and verify URL/title/body markers, modal state, or reversible field state. Record persisted postconditions such as created/removed items, files, emails, or API responses without producing them directly; Execution verifies them through the final-path command.
+
+Treat direct URLs and `href`s as hypotheses. For safe navigation, click the visible link once, observe behavior, compare direct navigation only after that, and preserve the click flow when JS/session state differs.
+
+## Integration and Verification
+
+After Investigation, stop before editing. Lock these four items:
+
+1. Observed state and evidence.
+2. Existing final-path implementation and command.
+3. Exact merge point and successful behavior that must remain unchanged.
+4. Verification command and expected postconditions.
+
+Do not change a previously successful final-path stage or deployment path until its prior success contract is understood. If verification fails, return to Investigation and change the existing stage that owns the evidenced cause—such as the browser function, wrapper, or session service—instead of adding a temporary runner, bypass, or parallel workflow.
+
+Build the durable script only after the flow is mapped. Encode:
+
+- exact entry URL from env/config/user instruction
+- browser/profile ownership and lifecycle requirements
+- frame/modal resolution
+- verified selectors, result markers, and postconditions
+- generous finite stage deadlines, next-control readiness, and failure branches that stop dependent actions
+- configured evidence artifacts and paths
+- project-defined safety modes and approval gates
+- project-approved credential inputs and redacted logs/evidence; never emit secrets, OTPs, cookies, tokens, or passwords
+
+Verification passes only when the final-path command produces the required postconditions and evidence. Manual success, inline inspection, a temporary runner, or a separately corrected result does not pass. Follow the host project's recovery rule when verification fails; do not leave unverified integration in the final path.
+
+For changed readiness logic, verify through that same implementation: an early marker advances promptly; a marker arriving later than the former ordinary delay but before the deadline succeeds; a missing marker reaches the deadline and fails without dependent actions; and a stale or wrong-context marker does not pass. Preserve existing successful cases. Use isolated fixtures or existing test doubles for these timing cases, and verify the actual site marker through the authorized final-path command before claiming site readiness works.
+
+Never close, kill, or delete a user-owned, shared, or persistent browser/profile, including one with an authenticated session. Close only a transient context created and owned by the current final-path run, after verification evidence is saved and no follow-up step needs the session.
+
+## Stop Conditions
+
+Stop and report evidence instead of continuing when:
+
+- an externally visible or destructive action lacks clear user authority;
+- the required browser, profile, tool, credential, approval, or final-path command is unavailable;
+- the same blocker recurs without a changed, verified premise;
+- an authentication challenge has no approved handling path;
+- the requested postcondition cannot be verified.
+
+For service-style wrappers and reusable CLI architecture, read
+[service-wrapper-pattern.md](references/service-wrapper-pattern.md).

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Evolution Loop"
+  short_description: "실험과 검증으로 시스템 성능을 단계적으로 개선합니다"
+  default_prompt: "Use $evolution-loop to agree on improvement goals, scope, criteria, and finite limits, then run trustworthy experiments, improve supporting tools and methods when needed, and confirm the agreed whole-system outcome on independent evidence."
