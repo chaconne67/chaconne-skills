@@ -1,4 +1,4 @@
-# Skills-Chaconne
+# Chaconne Skills
 
 Claude Code와 Codex에서 쓰는 에이전트 스킬 모음입니다. 실제 작업에서 쓰며 다듬은 스킬 가운데 누구나 써도 되는 것만 골라 올렸습니다. 대부분 한국어로 쓰여 있습니다.
 
