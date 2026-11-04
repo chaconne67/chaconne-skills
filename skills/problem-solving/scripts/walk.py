@@ -28,7 +28,7 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-# The models and the Jev key the user chose before the first run (SKILL.md, 「처음 쓰기 전에」); an environment variable of the same name wins.
+# Values the script reads (SKILL.md, 「스크립트에 필요한 것」): an environment variable, else a `name=value` line in SETTINGS.
 SETTINGS = Path(os.environ.get("PROBLEM_SOLVING_SETTINGS") or Path.home() / ".config" / "problem-solving" / "settings.env")
 MODEL_SETTING = {"claude": "INVESTIGATOR_CLAUDE_MODEL", "codex": "INVESTIGATOR_CODEX_MODEL"}
 JEV_URL = "https://api.typesafe.ai/v1/systemone"
@@ -37,15 +37,6 @@ SESSIONS = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / "session
 INPUT = ("현상", "요청", "대상")
 
 GUIDE = """문제해결은 현상 → 원인을 거슬러 묻는 연속 질문 → 버드뷰 → 해결책 순서로 합니다.
-
-## 설정 점검
-
-{preflight}
-
-스크립트 방식에 필요한 것이 이 컴퓨터에 준비됐는지 위에 적었습니다. 지금 앱에서 쓸 실행(Claude Code는 `start claude`, 그 밖의 앱은 `start codex`)이 준비되지 않았으면, 방식을 고르게 하기 전에 사용자에게 먼저 알리세요.
-- 무엇이 빠졌는지, 그리고 설정 파일 `{settings}`에 `이름=값` 줄로 넣는다는 것을 알리세요. 모델을 고르는 기준, Jev 키를 받는 곳, 파일 예시는 이 스킬 폴더의 SKILL.md 「처음 쓰기 전에」에 있으니 그 내용을 사용자에게 보여 주세요.
-- 모델은 사용자가 정합니다. 대신 고르지 말고, 키를 지어내거나 대신 받지 마세요. 사용자가 값을 알려 주면 그 값을 설정 파일에 넣어도 됩니다.
-- 준비되기 전에는 스크립트 방식을 고를 수 없고, 「직접」 방식은 설정 없이 쓸 수 있다고 알리세요.
 
 ## 방식 고르기
 
@@ -59,12 +50,12 @@ GUIDE = """문제해결은 현상 → 원인을 거슬러 묻는 연속 질문 �
 
 원인 조사는 지금까지의 대화를 모르는 조사 에이전트가 질문을 하나씩 받아 합니다.
 
-1. 조사 에이전트를 부를 방식을 고르세요. Claude Code에서는 `claude`, 그 밖의 앱(Codex 등)에서는 `codex`입니다. 아래 JSON을 표준입력으로 넘겨 `{run} start <앱>`을 실행하세요. 몇 분에서 수십 분 걸리니 두 방식 모두 백그라운드 프로세스로 실행하세요. 질문, 조사 에이전트가 하는 말, 실행하는 명령과 그 결과(긴 결과는 앞뒤만), Jev 판정이 나오는 즉시 `진행:`으로 시작하는 줄로 출력됩니다. 출력한 줄은 모두 기록 파일에도 남고, 첫 진행 줄이 기록 파일 위치입니다. 끝나면 마지막에 출력되는 것이 조사 결과입니다.
+1. 조사 에이전트를 부를 CLI를 고르세요. Claude Code에서는 `claude`, 그 밖의 앱에서는 `codex`를 쓰고, 그 CLI가 없으면 설치된 다른 하나를 쓰세요. 아래 JSON을 표준입력으로 넘겨 `{run} start <앱>`을 실행하세요. 몇 분에서 수십 분 걸리니 두 방식 모두 백그라운드 프로세스로 실행하세요. 질문, 조사 에이전트가 하는 말, 실행하는 명령과 그 결과(긴 결과는 앞뒤만), Jev 판정이 나오는 즉시 `진행:`으로 시작하는 줄로 출력됩니다. 출력한 줄은 모두 기록 파일에도 남고, 첫 진행 줄이 기록 파일 위치입니다. 끝나면 마지막에 출력되는 것이 조사 결과입니다.
    {{"현상": "...", "요청": "...", "대상": "..."}}
    - 현상: 잘못된 현상과 그때의 입력·상황. 원인·해결책·짐작은 넣지 마세요. 조사 에이전트가 정해 둔 결론 없이 시작해야 하기 때문입니다.
    - 요청: 사용자가 한 말 원문 그대로.
    - 대상: 무엇에 생긴 문제인지와 그 자료가 있는 곳(서버·경로·문서·서비스 이름, 접속 방법).
-   조사 에이전트는 `claude`면 Claude Code CLI(`claude -p`), `codex`면 Codex CLI(`codex exec`)로 부르고, 모델은 사용자가 설정 파일 `{settings}`에 정해 둔 것을 씁니다. Jev 판정에는 같은 파일의 `TYPESAFE_API_KEY`가 필요합니다. 그래도 빠진 것이 있으면 스크립트가 조사를 시작하기 전에 빠진 것을 모두 알리고 멈춥니다. 그때는 위 「설정 점검」 아래의 안내대로 하세요.
+   조사 에이전트는 `claude`면 Claude Code CLI(`claude -p`), `codex`면 Codex CLI(`codex exec`)로 부릅니다. 모델은 `INVESTIGATOR_CLAUDE_MODEL`·`INVESTIGATOR_CODEX_MODEL`에 정해 둔 것을 쓰고, 없으면 그 CLI의 기본 모델을 씁니다. Jev 키 `TYPESAFE_API_KEY`가 없으면 스크립트가 첫 질문 전에 멈춥니다. 그때는 SKILL.md 「스크립트에 필요한 것」대로 갖춘 뒤 다시 실행하세요.
    스크립트가 오류로 끝나면 그 오류를 사용자에게 보고하고 멈추세요. 직접 조사해서 대신하면 정해 둔 결론 없이 조사한다는 이 절차의 목적이 사라집니다.
 2. 실행 중:
    - 포그라운드: 출력을 지켜보다 진행 줄이 나오면 고르거나 줄이지 말고 그대로 사용자에게 전하세요. Claude Code에서는 Monitor로 `{run} watch <출력 파일> <전한 줄 수>`를 실행하세요. 출력 파일은 `start`를 돌린 백그라운드 명령의 출력이 쌓이는 파일이고(기록 파일이 아님), 전한 줄 수는 처음엔 0, 다시 걸 때는 마지막으로 받은 끝 줄 번호입니다. 앱은 당신이 깨어나 답을 마칠 때마다 사용자에게 알림을 띄우므로, 이 명령은 질문이 시작하거나 판정이 나와 단계가 끝날 때, 한 단계가 5분 넘게 이어질 때(중간 보고), 실행이 끝날 때만 `<까닭>: <첫 줄>~<끝 줄>줄`을 한 줄 냅니다. 그때마다 출력 파일의 그 줄들을 읽어 진행 줄을 모두 한꺼번에 전하세요. Monitor가 시간이 다 돼 끝나면 같은 명령을 전한 줄 수만 바꿔 다시 거세요. 다른 앱에서는 실행 중인 프로세스의 출력을 읽는 기능으로 새 진행 줄을 받으세요.
@@ -149,7 +140,8 @@ def codex(run, prompt, system, cwd):
     instructions.write_text(system, encoding="utf-8")
     turn = sum("question" in item for item in run["log"])
     events = cwd / f"codex-{turn}.jsonl"
-    args = [exe, "exec", "--ignore-user-config", "--skip-git-repo-check", "--json", "-m", setting(MODEL_SETTING["codex"]),
+    args = [exe, "exec", "--ignore-user-config", "--skip-git-repo-check", "--json",
+            *(["-m", model] if (model := setting(MODEL_SETTING["codex"], "")) else []),
             "-s", "workspace-write", "-C", str(cwd)]
     # Investigations read servers and services over the network; writes stay confined to the workspace.
     config = {"model_instructions_file": instructions.as_posix(), "approval_policy": "never",
@@ -215,7 +207,7 @@ def respond(run, prompt, system, cwd=None):
 
 
 def setting(name, default=None):
-    """The value the user set: an environment variable, else a `name=value` line in SETTINGS. Raises naming where to set it."""
+    """An environment variable, else a `name=value` line in SETTINGS. Raises naming where it is read from."""
     value = os.environ.get(name)
     if value is None and SETTINGS.is_file():
         for line in SETTINGS.read_text(encoding="utf-8").splitlines():
@@ -226,33 +218,11 @@ def setting(name, default=None):
         return value
     if default is not None:
         return default
-    raise KeyError(f"{name}이 설정되지 않음: 환경 변수나 {SETTINGS}에 `{name}=값` 줄을 넣으세요. 무엇을 넣을지는 SKILL.md의 「처음 쓰기 전에」에 있습니다.")
+    raise KeyError(f"{name}이 없음: 환경 변수나 {SETTINGS}의 `{name}=값` 줄에서 읽습니다. SKILL.md 「스크립트에 필요한 것」을 보세요.")
 
 
 def jev_key():
     return setting("TYPESAFE_API_KEY")
-
-
-def missing(app):
-    """What `start <app>` still needs on this computer: its CLI, its model setting, the Jev key."""
-    def unset(name):
-        try:
-            setting(name)
-        except KeyError:
-            return True
-        return False
-    need = [f"`{app}` 명령(설치하고 로그인)"] if not shutil.which(app) else []
-    return need + [f"`{name}`" for name in (MODEL_SETTING[app], "TYPESAFE_API_KEY") if unset(name)]
-
-
-def preflight():
-    """The settings check printed at the top of the guide."""
-    lines = [f"- 설정 파일: `{SETTINGS}` ({'있음' if SETTINGS.is_file() else '없음'})"]
-    for app in MODEL_SETTING:
-        need = missing(app)
-        lines.append(f"- `start {app}`: " + ("준비됨" if not need else "빠짐: " + ", ".join(need)))
-    lines.append("- 「직접」 방식: 설정 없이 쓸 수 있음")
-    return "\n".join(lines)
 
 
 def jev(run, questions, state):
@@ -288,7 +258,8 @@ def claude(prompt, system, session, resume, cwd, run=None):
     if not exe:
         raise FileNotFoundError("claude 명령을 찾을 수 없음")
     tools = ("Read", "Grep", "Glob", "Bash")
-    args = [exe, "-p", "--output-format", "stream-json", "--verbose", "--safe-mode", "--strict-mcp-config", "--model", setting(MODEL_SETTING["claude"]),
+    args = [exe, "-p", "--output-format", "stream-json", "--verbose", "--safe-mode", "--strict-mcp-config",
+            *(["--model", model] if (model := setting(MODEL_SETTING["claude"], "")) else []),
             "--system-prompt", system, "--tools", ",".join(tools), "--allowedTools", " ".join(tools),
             "--resume" if resume else "--session-id", session]
     events = cwd / (f"claude-{sum('question' in item for item in run['log'])}.jsonl" if run is not None else "claude.jsonl")
@@ -480,11 +451,11 @@ def start(app="claude"):
     absent = [name for name in INPUT if not str(given.get(name) or "").strip()]
     if absent:
         raise ValueError(f"넘긴 JSON에 {', '.join(absent)} 값이 없음")
-    # Check the user's choices before the first question, not after minutes of investigation.
-    need = missing(app)
-    if need:
-        raise SystemExit(f"설정 점검: `start {app}`에 필요한 것이 빠져 조사를 시작하지 않았습니다. 빠진 것: {', '.join(need)}\n"
-                         f"설정 파일 `{SETTINGS}`에 `이름=값` 줄로 넣으세요. 무엇을 넣을지는 SKILL.md의 「처음 쓰기 전에」에 있습니다.")
+    # The key is checked before the first question, not after minutes of investigation; a missing CLI fails at once anyway.
+    try:
+        jev_key()
+    except KeyError as missing:
+        raise SystemExit(missing.args[0])
     run = {"id": uuid.uuid4().hex[:8], "app": app, "session": str(uuid.uuid4()), "asked": False,
            "input": {name: given[name] for name in INPUT}, "log": []}
     (RUNS / run["id"]).mkdir(parents=True)
@@ -556,7 +527,7 @@ def main():
     sys.stdin.reconfigure(encoding="utf-8")
     command = sys.argv[1:]
     if not command:
-        print(GUIDE.format(run=f'"{sys.executable}" "{Path(__file__).resolve()}"', settings=SETTINGS, preflight=preflight()))
+        print(GUIDE.format(run=f'"{sys.executable}" "{Path(__file__).resolve()}"'))
     elif command == ["start"]:
         start()
     elif len(command) == 2 and command[0] == "start" and command[1] in MODEL_SETTING:
