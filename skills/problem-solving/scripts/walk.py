@@ -36,7 +36,20 @@ RUNS = Path(tempfile.gettempdir()) / "problem-solving"  # <id>.json: one investi
 SESSIONS = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / "sessions"
 INPUT = ("현상", "요청", "대상")
 
-GUIDE = """문제해결은 현상 → 원인을 거슬러 묻는 연속 질문 → 버드뷰 → 해결책 순서로 합니다. 시작하기 전에, 사용자가 방식을 이미 정하지 않았으면 앱의 선택 버튼 도구로 아래 셋 중 하나를 고르게 하세요.
+GUIDE = """문제해결은 현상 → 원인을 거슬러 묻는 연속 질문 → 버드뷰 → 해결책 순서로 합니다.
+
+## 설정 점검
+
+{preflight}
+
+스크립트 방식에 필요한 것이 이 컴퓨터에 준비됐는지 위에 적었습니다. 지금 앱에서 쓸 실행(Claude Code는 `start claude`, 그 밖의 앱은 `start codex`)이 준비되지 않았으면, 방식을 고르게 하기 전에 사용자에게 먼저 알리세요.
+- 무엇이 빠졌는지, 그리고 설정 파일 `{settings}`에 `이름=값` 줄로 넣는다는 것을 알리세요. 모델을 고르는 기준, Jev 키를 받는 곳, 파일 예시는 이 스킬 폴더의 SKILL.md 「처음 쓰기 전에」에 있으니 그 내용을 사용자에게 보여 주세요.
+- 모델은 사용자가 정합니다. 대신 고르지 말고, 키를 지어내거나 대신 받지 마세요. 사용자가 값을 알려 주면 그 값을 설정 파일에 넣어도 됩니다.
+- 준비되기 전에는 스크립트 방식을 고를 수 없고, 「직접」 방식은 설정 없이 쓸 수 있다고 알리세요.
+
+## 방식 고르기
+
+사용자가 방식을 이미 정하지 않았으면 앱의 선택 버튼 도구로 아래 셋 중 하나를 고르게 하세요.
 - 직접: 당신이 질문을 스스로 묻고 답하며 조사합니다. 아래 「직접 진행」을 따르세요.
 - 스크립트 포그라운드: 이 스크립트가 조사 에이전트로 끝까지 진행하고, 당신은 출력을 지켜보다 진행 줄을 사용자에게 전합니다.
 - 스크립트 백그라운드: 이 스크립트가 끝까지 진행하고, 당신은 끝나기를 기다려 결과만 보고합니다. 모든 과정은 기록 파일에 남습니다.
@@ -51,7 +64,7 @@ GUIDE = """문제해결은 현상 → 원인을 거슬러 묻는 연속 질문 �
    - 현상: 잘못된 현상과 그때의 입력·상황. 원인·해결책·짐작은 넣지 마세요. 조사 에이전트가 정해 둔 결론 없이 시작해야 하기 때문입니다.
    - 요청: 사용자가 한 말 원문 그대로.
    - 대상: 무엇에 생긴 문제인지와 그 자료가 있는 곳(서버·경로·문서·서비스 이름, 접속 방법).
-   조사 에이전트는 `claude`면 Claude Code CLI(`claude -p`), `codex`면 Codex CLI(`codex exec`)로 부르고, 모델은 사용자가 설정 파일 `{settings}`에 정해 둔 것을 씁니다. Jev 판정에는 같은 파일의 `TYPESAFE_API_KEY`가 필요합니다. 설정이 빠졌으면 스크립트가 조사를 시작하기 전에 무엇이 빠졌는지 알리고 멈춥니다. 그때는 SKILL.md의 「처음 쓰기 전에」를 사용자에게 안내해 모델과 키를 정하게 하세요. 모델을 대신 고르거나 키를 지어내지 마세요. 사용자가 지금 정하지 않으면 「직접 진행」을 쓸 수 있습니다.
+   조사 에이전트는 `claude`면 Claude Code CLI(`claude -p`), `codex`면 Codex CLI(`codex exec`)로 부르고, 모델은 사용자가 설정 파일 `{settings}`에 정해 둔 것을 씁니다. Jev 판정에는 같은 파일의 `TYPESAFE_API_KEY`가 필요합니다. 그래도 빠진 것이 있으면 스크립트가 조사를 시작하기 전에 빠진 것을 모두 알리고 멈춥니다. 그때는 위 「설정 점검」 아래의 안내대로 하세요.
    스크립트가 오류로 끝나면 그 오류를 사용자에게 보고하고 멈추세요. 직접 조사해서 대신하면 정해 둔 결론 없이 조사한다는 이 절차의 목적이 사라집니다.
 2. 실행 중:
    - 포그라운드: 출력을 지켜보다 진행 줄이 나오면 고르거나 줄이지 말고 그대로 사용자에게 전하세요. Claude Code에서는 Monitor로 `{run} watch <출력 파일> <전한 줄 수>`를 실행하세요. 출력 파일은 `start`를 돌린 백그라운드 명령의 출력이 쌓이는 파일이고(기록 파일이 아님), 전한 줄 수는 처음엔 0, 다시 걸 때는 마지막으로 받은 끝 줄 번호입니다. 앱은 당신이 깨어나 답을 마칠 때마다 사용자에게 알림을 띄우므로, 이 명령은 질문이 시작하거나 판정이 나와 단계가 끝날 때, 한 단계가 5분 넘게 이어질 때(중간 보고), 실행이 끝날 때만 `<까닭>: <첫 줄>~<끝 줄>줄`을 한 줄 냅니다. 그때마다 출력 파일의 그 줄들을 읽어 진행 줄을 모두 한꺼번에 전하세요. Monitor가 시간이 다 돼 끝나면 같은 명령을 전한 줄 수만 바꿔 다시 거세요. 다른 앱에서는 실행 중인 프로세스의 출력을 읽는 기능으로 새 진행 줄을 받으세요.
@@ -218,6 +231,28 @@ def setting(name, default=None):
 
 def jev_key():
     return setting("TYPESAFE_API_KEY")
+
+
+def missing(app):
+    """What `start <app>` still needs on this computer: its CLI, its model setting, the Jev key."""
+    def unset(name):
+        try:
+            setting(name)
+        except KeyError:
+            return True
+        return False
+    need = [f"`{app}` 명령(설치하고 로그인)"] if not shutil.which(app) else []
+    return need + [f"`{name}`" for name in (MODEL_SETTING[app], "TYPESAFE_API_KEY") if unset(name)]
+
+
+def preflight():
+    """The settings check printed at the top of the guide."""
+    lines = [f"- 설정 파일: `{SETTINGS}` ({'있음' if SETTINGS.is_file() else '없음'})"]
+    for app in MODEL_SETTING:
+        need = missing(app)
+        lines.append(f"- `start {app}`: " + ("준비됨" if not need else "빠짐: " + ", ".join(need)))
+    lines.append("- 「직접」 방식: 설정 없이 쓸 수 있음")
+    return "\n".join(lines)
 
 
 def jev(run, questions, state):
@@ -442,12 +477,14 @@ def finish(run, head):
 
 def start(app="claude"):
     given = json.loads(sys.stdin.read())
-    missing = [name for name in INPUT if not str(given.get(name) or "").strip()]
-    if missing:
-        raise ValueError(f"넘긴 JSON에 {', '.join(missing)} 값이 없음")
+    absent = [name for name in INPUT if not str(given.get(name) or "").strip()]
+    if absent:
+        raise ValueError(f"넘긴 JSON에 {', '.join(absent)} 값이 없음")
     # Check the user's choices before the first question, not after minutes of investigation.
-    setting(MODEL_SETTING[app])
-    jev_key()
+    need = missing(app)
+    if need:
+        raise SystemExit(f"설정 점검: `start {app}`에 필요한 것이 빠져 조사를 시작하지 않았습니다. 빠진 것: {', '.join(need)}\n"
+                         f"설정 파일 `{SETTINGS}`에 `이름=값` 줄로 넣으세요. 무엇을 넣을지는 SKILL.md의 「처음 쓰기 전에」에 있습니다.")
     run = {"id": uuid.uuid4().hex[:8], "app": app, "session": str(uuid.uuid4()), "asked": False,
            "input": {name: given[name] for name in INPUT}, "log": []}
     (RUNS / run["id"]).mkdir(parents=True)
@@ -519,7 +556,7 @@ def main():
     sys.stdin.reconfigure(encoding="utf-8")
     command = sys.argv[1:]
     if not command:
-        print(GUIDE.format(run=f'"{sys.executable}" "{Path(__file__).resolve()}"', settings=SETTINGS))
+        print(GUIDE.format(run=f'"{sys.executable}" "{Path(__file__).resolve()}"', settings=SETTINGS, preflight=preflight()))
     elif command == ["start"]:
         start()
     elif len(command) == 2 and command[0] == "start" and command[1] in MODEL_SETTING:

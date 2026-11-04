@@ -61,7 +61,8 @@ class WalkTests(unittest.TestCase):
         self.settings = self.root / "settings.env"
         self.settings.write_text("INVESTIGATOR_CLAUDE_MODEL=test-claude-model\nINVESTIGATOR_CODEX_MODEL=test-codex-model\n"
                                  "TYPESAFE_API_KEY=test-key\n", encoding="utf-8")
-        for target in (patch.object(walk, "SETTINGS", self.settings), patch.dict(walk.os.environ)):
+        for target in (patch.object(walk, "SETTINGS", self.settings), patch.dict(walk.os.environ),
+                       patch.object(walk.shutil, "which", side_effect=lambda name: f"/bin/{name}")):
             target.start()
             self.addCleanup(target.stop)
         for name in ("INVESTIGATOR_CLAUDE_MODEL", "INVESTIGATOR_CODEX_MODEL", "TYPESAFE_API_KEY", "JEV_MODEL"):
@@ -90,14 +91,31 @@ class WalkTests(unittest.TestCase):
         with self.assertRaisesRegex(KeyError, "INVESTIGATOR_CODEX_MODEL"):
             walk.setting("INVESTIGATOR_CODEX_MODEL")
 
-    def test_unset_model_or_key_stops_before_the_first_question(self):
-        for text in ("TYPESAFE_API_KEY=k\n", "INVESTIGATOR_CLAUDE_MODEL=m\n"):
-            with self.subTest(text=text), patch.object(walk, "ask") as ask, self.assertRaises(KeyError), \
+    def test_unset_model_or_key_stops_before_the_first_question_naming_everything_missing(self):
+        for text, absent in (("TYPESAFE_API_KEY=k\n", ["INVESTIGATOR_CLAUDE_MODEL"]),
+                             ("INVESTIGATOR_CLAUDE_MODEL=m\n", ["TYPESAFE_API_KEY"]),
+                             ("", ["INVESTIGATOR_CLAUDE_MODEL", "TYPESAFE_API_KEY"])):
+            with self.subTest(text=text), patch.object(walk, "ask") as ask, self.assertRaises(SystemExit) as stop, \
                     patch.object(walk.sys, "stdin", io.StringIO(json.dumps({"현상": "x", "요청": "y", "대상": "z"}))):
                 self.settings.write_text(text, encoding="utf-8")
                 walk.start("claude")
             ask.assert_not_called()
+            for name in absent:
+                self.assertIn(f"`{name}`", str(stop.exception.code))
         self.assertEqual(list(self.root.glob("*.json")), [])
+
+    def test_preflight_shows_what_each_start_needs(self):
+        self.settings.write_text("INVESTIGATOR_CLAUDE_MODEL=m\nTYPESAFE_API_KEY=k\n", encoding="utf-8")
+        with patch.object(walk.shutil, "which", side_effect=lambda name: None if name == "codex" else "/bin/claude"):
+            shown = walk.preflight()
+        self.assertIn("`start claude`: 준비됨", shown)
+        self.assertIn("`start codex`: 빠짐: `codex` 명령(설치하고 로그인), `INVESTIGATOR_CODEX_MODEL`", shown)
+        self.assertIn("(있음)", shown)
+        self.settings.unlink()
+        self.assertIn("(없음)", walk.preflight())
+        guide = walk.GUIDE.format(run="walk", settings=walk.SETTINGS, preflight=walk.preflight())
+        self.assertLess(guide.index("## 설정 점검"), guide.index("## 방식 고르기"))
+        self.assertIn("`start claude`: 빠짐:", guide)
 
     def start(self, app, answers, judgments):
         """walk.start with the investigator's answers (or an exception) and Jev's judgments given in order."""
