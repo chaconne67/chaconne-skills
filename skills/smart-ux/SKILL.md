@@ -1,6 +1,6 @@
 ---
 name: smart-ux
-description: "Use when designing, creating, modifying, or reviewing product UI and user flows for usability, accessibility, or ethical behavioral design."
+description: "화면과 사용자 흐름을 사용성·접근성·윤리적 설계 기준으로 만들거나 점검할 때 쓴다."
 ---
 
 # Smart UX

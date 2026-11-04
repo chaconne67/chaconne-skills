@@ -1,11 +1,11 @@
 ---
 name: prompt-guide
-description: "Design or review prompts and instruction texts that an LLM reads to decide what to do, including runtime prompts, agent instructions, skill instructions, prompt templates, and reusable task directives. Apply three prompt golden rules: avoid hardcoding, provide enough context, and use optimized examples. Do not use for domain correctness, code bugs, implementation-plan validation, architecture decisions, policy authority changes, or casual one-off instructions unless the user explicitly asks to review the instruction wording."
+description: "언어모델의 행동을 지시하는 프롬프트·지침·템플릿을 작성·수정·점검할 때 항상 쓴다. 일회용 지시와 다른 에이전트에게 주는 작업 지시도 포함한다."
 ---
 
 # Prompt Guide
 
-LLM 행동을 유도하는 텍스트를 작성하거나 검토할 때 사용한다. 대상은 앱이 런타임에 송출하는 프롬프트, 에이전트 지시문, 스킬 지시문, 재사용 지시 템플릿을 모두 포함한다.
+언어모델에게 줄 행동 지시를 작성·수정·점검할 때 사용한다. 일회용 작업 지시, 다른 에이전트에게 주는 작업 지시, 앱의 런타임 프롬프트, 에이전트·스킬 지시문, 재사용 템플릿을 모두 포함한다.
 
 ## `$skill-writing-guide`와의 관계
 
@@ -20,15 +20,14 @@ LLM 행동을 유도하는 텍스트를 작성하거나 검토할 때 사용한�
 
 ## 사용하지 않는 경우
 
-질문의 본질이 프롬프트·지시문 품질이 아니면 사용하지 않는다.
+아래 작업 자체는 적용 대상이 아니다. 다만 그 과정에서 언어모델에게 줄 행동 지시를 작성·수정·점검하면 그 지시문에는 사용한다.
 
 - 코드 버그, 실패한 테스트, 런타임 오류, 데이터 모델 결함, 아키텍처 결정.
 - 도메인 정확성, 비즈니스 정책, 법률·의료·금융 사실, 제품 결정.
 - 구현 계획 검증, 단계 순서, 완료 게이트, 컨텍스트-계획 정합성.
 - 권한 계층, 안전 정책, 도구 권한, 시스템/개발자 지시 우선순위.
-- 사용자가 문구 검토를 명시적으로 요청하지 않은 일회성 지시.
 
-요청이 위 범주에 속하면 멈추고 적절한 스킬이나 일반 추론으로 처리한다. 비프롬프트 문제가 정리된 뒤 문구 계층만 이 스킬로 다룰 수 있다.
+이 스킬은 지시문 품질만 점검한다. 도메인 사실·코드 정확성·실행 권한은 해당 전문 스킬이나 원래 작업 절차로 검증한다.
 
 ## 검토 출력
 

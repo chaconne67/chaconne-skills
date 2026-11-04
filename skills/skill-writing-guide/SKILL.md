@@ -1,6 +1,6 @@
 ---
 name: skill-writing-guide
-description: "Use when writing or reviewing Codex skills, Claude skills, prompt guides, agent instructions, or reusable task directives, especially to decide what information belongs in the instruction and what should be removed. Focuses on including non-obvious domain facts, irregular patterns, and behavior-changing rules while removing obvious, redundant, or low-value wording."
+description: "스킬·지시문을 쓰거나 점검할 때 무엇을 넣고 뺄지 정하는 데 쓴다."
 ---
 
 # 스킬 내용 작성 원칙

@@ -1,6 +1,6 @@
 ---
 name: web-automation
-description: Use when operating websites, verifying remote development UI, or writing, modifying, debugging, reviewing, or testing web automation code, including Playwright, Selenium, and CDP workflows.
+description: "웹사이트를 조작하거나 원격 개발 화면을 확인할 때, Playwright·Selenium·CDP 자동화 코드를 쓰고 고치고 시험할 때 쓴다."
 ---
 
 # Web Automation

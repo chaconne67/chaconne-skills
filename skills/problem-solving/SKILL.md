@@ -1,6 +1,6 @@
 ---
 name: problem-solving
-description: "사용자가 `문제해결`, `문제해결 게이트`, `에러 진단`이라고 명시적으로 요청했을 때, 또는 다른 스킬·지침이 이 스킬을 쓰라고 정한 오류 처리에서만 쓴다. 현상 잠금 → 연속 질문 → 버드뷰 → 결과 대조 → 근본 원인 판정 → 해결책 → 적용·검증 → 재발 판정 순서로, 질문마다 실제로 확인한 결과로 원인을 찾는다. Use only when the user explicitly asks for 문제해결 / problem solving / 에러 진단, or another skill names it; not for ordinary debugging or quick fixes."
+description: "사용자가 '문제해결'·'문제해결 게이트'·'에러 진단'을 요청했거나 다른 스킬·지침이 지정한 오류 처리에서만 쓴다. 일반 디버깅·빠른 수정에는 쓰지 않는다."
 ---
 
 # 문제해결

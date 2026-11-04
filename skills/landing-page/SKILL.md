@@ -1,6 +1,6 @@
 ---
 name: landing-page
-description: 랜딩페이지·홈페이지 소개 화면을 만들거나 다시 만들 때 가장 먼저 사용한다. 아이디어 단계부터 메시지와 섹션별 문구를 정하고, 디자인 시안(refero-design·design-taste-frontend 방법, Figma 시안)과 이미지 컨셉을 거쳐, 한 섹션씩 만들고(impeccable·emil-design-eng) Playwright로 렌더해 전체를 다시 보는 반복으로 페이지를 완성한 뒤, 전체 점검과 운영 배포까지 한다.
+description: "랜딩페이지·홈페이지 소개 화면을 만들거나 다시 만들 때 가장 먼저 쓴다. 문구부터 시안·제작·배포까지 이끈다."
 ---
 
 # 랜딩페이지 기획

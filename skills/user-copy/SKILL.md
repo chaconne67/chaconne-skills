@@ -1,6 +1,6 @@
 ---
 name: user-copy
-description: "사람이 읽는 화면 문구를 쓰거나 고칠 때 쓴다: 앱·웹 화면의 제목·설명·버튼·툴팁·안내·알림·오류·빈 화면, 설정 항목의 이름과 설명, 온보딩, 랜딩·홈페이지 문구, 시안·목업에 들어가는 문구. 그 화면에 온 사람의 관점에서 쓰고, 보면 아는 설명·만든 쪽 사정·AI 티 나는 표현·풀지 않은 용어를 걸러 낸다. Use whenever writing or revising user-facing UI text, settings labels, tooltips, notices, errors, onboarding, landing copy, or text inside mockups. Not for chat replies to the user (they follow the answer gate) or for prompts a model reads (prompt-guide)."
+description: "앱·웹 화면 문구(버튼, 안내, 오류, 툴팁, 설정 이름, 온보딩, 랜딩 문구, 시안 속 글)를 쓰거나 고칠 때 쓴다. 사용자에게 하는 대화 답과 모델이 읽는 프롬프트에는 쓰지 않는다."
 ---
 
 # 사용자 문구

@@ -32,8 +32,8 @@ Agent skills for Claude Code and Codex, refined through daily use. Most are writ
 - Codex: `~/.codex/skills/<스킬 이름>/`
 
 ```bash
-git clone https://github.com/chaconne67/Skills-Chaconne.git
-cp -r Skills-Chaconne/skills/problem-solving ~/.claude/skills/
+git clone https://github.com/chaconne67/chaconne-skills.git
+cp -r chaconne-skills/skills/problem-solving ~/.claude/skills/
 ```
 
 ## 라이선스

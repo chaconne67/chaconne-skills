@@ -1,13 +1,13 @@
 ---
 name: skill-review
-description: Use when the user says "skill-review", "스킬리뷰", "스킬 점검", or asks to review and revise a Codex skill.
+description: "스킬이나 그 설명·본문·참조 파일을 작성·수정·점검할 때 쓴다."
 ---
 
 # Skill Review
 
 ## Core Rule
 
-Review one Codex skill with both `$prompt-guide` and `$skill-writing-guide`, revise it, then review again. Repeat until there are no remaining prompt-quality, skill-writing, metadata, or validation issues.
+Review one skill with both `$prompt-guide` and `$skill-writing-guide`, revise it, then review again. Repeat until there are no remaining prompt-quality, skill-writing, metadata, or validation issues. This includes the required prompt review; do not run a separate duplicate `prompt-guide` check.
 
 ## Scope
 

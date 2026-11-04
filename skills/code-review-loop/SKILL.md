@@ -1,6 +1,6 @@
 ---
 name: code-review-loop
-description: PR이나 로컬 diff를 리뷰 패스로 리뷰하고, 승인된 finding을 수정한 뒤 finding이 없을 때까지 같은 범위에서 재리뷰할 때 사용합니다.
+description: "프로그램의 실행 동작·데이터·권한·외부 효과를 바꾼 뒤(실행 계약이 그대로인 단순 표현 수정은 제외), 또는 PR·diff 리뷰를 요청받았을 때 쓴다."
 ---
 
 # 코드 리뷰 루프

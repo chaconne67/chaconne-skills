@@ -1,6 +1,6 @@
 ---
 name: evolution-loop
-description: "Use when improving a system, workflow, model, prompt, skill, or supporting tool through iterative experiments and regression checks."
+description: "시스템·워크플로·프롬프트·스킬·도구를 실험과 회귀 검사를 되풀이하며 개선할 때 쓴다."
 ---
 
 # Evolution Loop
@@ -78,7 +78,7 @@ The experiment path is itself a repeated execution path, so the same single-path
 2. **Select and freeze the comparison.** Choose focused hypotheses and discriminating observations, the baseline/candidates, source cases, expected contracts, objectives and protected metrics, effort bounds, resource regime, screening rules, and evaluation method before inspecting candidate results. Include normal, failure, and counterconditions. Use matched inputs and state; account for order, cache, service drift, or stochastic variation where material.
 3. **Investigate before changing.** Keep analysis, test, and change distinct. During a test, freeze the candidate and measurement method. Follow the cause procedure if a failure appears. If progress requires a better method or tool, make that a bounded supporting change using the procedure below. Changing either the candidate or measurement method starts a new comparison version.
 4. **Make a small attributable change.** Replace, merge, or refine the responsible rule, implementation, or supporting capability in the declared path. Record connected changes as a unit; preserve separate changes so they can be evaluated or reverted independently.
-5. **Recheck focused and broad behavior.** Rerun the failure, counterconditions, protected successes, and common set. Include directly affected consumers. If another dimension worsens, investigate that connection; an average gain cannot hide a breached protection.
+5. **Recheck focused and broad behavior.** Rerun the failure, counterconditions, protected successes, and common set. Include directly affected consumers. If another dimension worsens, investigate that connection; an average gain cannot hide a breached protection. If the candidate improves overall but causes a new failure, repair it as below before rejecting the candidate.
 6. **Confirm across the whole scope.** Before promoting an improvement to the agreed target, freeze the integrated candidate and compare it with the baseline on independent evidence covering the whole agreed scope, all evaluation dimensions, and the original system-level outcome. A check of only the improved problem cannot qualify it. Supporting capabilities are verified against their declared tool contract as described below; that verification does not confirm the target's performance.
 7. **Decide and learn.** Record adopt, reject, defer, or keep against the agreed criteria, whether the hypothesis was supported/refuted/unresolved, and the next useful question or enabling capability. Only confirmed, adopted changes become the relevant next baseline; retain useful unconfirmed work as experimental candidates. Separate target performance gains, supporting-tool/method gains, and knowledge gained without a measured improvement. The next round starts from this evidence within the remaining budget.
 
@@ -87,6 +87,19 @@ For suspected interactions, compare the baseline, A alone, B alone, and A+B when
 Set sample effort from the distinction needed and cost of error. Small batches discover problems but may not establish reliable rates or rare-event safety. Preserve failures and all planned repetitions; do not retry until a pass. Follow any prespecified adaptive allocation or stopping rule; otherwise a post-result change to sampling or evaluation starts a new comparison and is not retrospective evidence that the old criterion passed. When stochastic performance is the claim, use prespecified repeats and uncertainty appropriate to independent sampling units. Deterministic contracts can use exact assertions. Do not invent universal sample counts or pass thresholds.
 
 Keep the history of tried candidates and inspected results. Searching more candidates or repeatedly checking a score can select a lucky winner even with an unchanged benchmark. Treat the best exploration score as a hypothesis, not confirmed performance. Freeze the selected candidate and confirm it against the baseline using the whole-scope independent-evidence rules; use inference appropriate to the actual selection and stopping design when making statistical claims. Do not promote a noise-level gain merely because it ranks first.
+
+### Repair a Candidate's New Failure
+
+A candidate that improves the target can still fail a case the baseline got right. Rerunning the whole set many times spends the budget on cases the repair does not touch, so repair on the failing case and confirm on the set that exposed it, within the user's approval and at most five attempts:
+
+1. **Confirm the cause.** The failure is the candidate's only when the candidate's input where it failed differs from the baseline's. A failure on an identical input is stochastic variation and is not repaired.
+2. **Freeze a case set.** Take the failing case and the cases the candidate newly gets right that resemble it (the gains). Judged on the failing case alone, a repair tends to fix it by losing those gains.
+3. **Change one thing.** Find what makes the candidate treat the failing case like the gains, and change that step with a rule that states the difference, not a value that excludes only this case. To find it, look at the failure from another angle than the one the change works by: line up every output of that kind the candidate produced across the cases (the gains, the failure, and those that changed nothing) and compare them on other measurable properties of the input. A property only the failures share is the material for the rule; one case seen alone shows none. Revert the previous attempt's change first, so attempts do not pile up.
+4. **Run the case set.** Where output varies between runs, run it several times; it passes only when every run gets every case right. If the failing case and a gain pass or fail together across runs, the change cannot tell them apart; go back to step 3's comparison rather than rewording again. When the change makes the inputs exact (the failing case's equal to the baseline's, the gains' unchanged), check the inputs instead of repeating, and say so.
+5. **Rerun the set that exposed the failure** (usually the common set), against the same baseline. A new candidate-caused failure there begins the next attempt with that case added to the set.
+6. **Stop** when an attempt passes that set, or after the fifth attempt. Report each attempt's change, result and time before the next; if none passes, report the attempts and the narrower change that remains, such as removing the part that caused the failure.
+
+An attempt is one change with its case-set runs and its rerun of the set that exposed the failure. A passing repair still goes on to whole-scope confirmation.
 
 ## Diagnose the Mechanism
 
