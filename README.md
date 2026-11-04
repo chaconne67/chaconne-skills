@@ -13,7 +13,7 @@ Agent skills for Claude Code and Codex, refined through daily use. Most are writ
 | [evolution-loop](skills/evolution-loop) | 시스템·프롬프트·스킬을 실험과 회귀 검사로 되풀이해 개선한다 |
 | [landing-page](skills/landing-page) | 랜딩페이지를 메시지·문구부터 디자인 시안, 섹션별 제작, 배포까지 단계별로 만든다 |
 | [preflight](skills/preflight) | 스킬이나 반복 작업을 돌리기 전에 드라이런으로 전제 조건과 실패 위험을 점검한다 |
-| [problem-solving](skills/problem-solving) | 오류의 근본 원인을 질문을 하나씩 던져 실제 확인으로 찾는다. 맥락 없는 조사 에이전트와 판정 모델로 돌리는 스크립트 방식은 처음 쓰기 전에 모델·키 설정이 필요하다(`SKILL.md` 참고) |
+| [problem-solving](skills/problem-solving) | 오류의 근본 원인을 질문을 하나씩 던져 실제 확인으로 찾는다. 언어 모델이 결론부터 내고 확인만 하는 습성을, 맥락 없는 조사 에이전트와 판정 모델로 막는다. 왜 이런 구조인지는 [설명](skills/problem-solving/README.md), 스크립트 방식의 모델·키 설정은 `SKILL.md` |
 | [prompt-guide](skills/prompt-guide) | LLM이 읽는 프롬프트·지시문을 설계하거나 점검한다 |
 | [skill-review](skills/skill-review) | 스킬 하나를 prompt-guide·skill-writing-guide로 점검하고 고치기를 되풀이한다 |
 | [skill-writing-guide](skills/skill-writing-guide) | 스킬·지시문에 넣을 정보와 뺄 정보를 가른다 |
